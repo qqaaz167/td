@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Castle Defender</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Title Screen -->
+<div id="screen-title" class="screen active">
+  <div class="title-box">
+    <h1>Castle Defender</h1>
+    <p class="subtitle">點擊施法・守護城堡</p>
+    <div id="title-resources" class="resource-bar"></div>
+    <button id="btn-start" class="btn-primary">開始遊戲</button>
+    <button id="btn-upgrade-title" class="btn-secondary">升級技能</button>
+  </div>
+</div>
+
+<!-- Combat Screen -->
+<div id="screen-combat" class="screen">
+  <div id="combat-header">
+    <span id="hud-level">關卡 1</span>
+    <span id="hud-wave">擊殺 0</span>
+    <span id="hud-timer">2:30</span>
+    <span id="hud-hp">城堡 HP: 500/500</span>
+  </div>
+  <div id="canvas-wrap">
+    <canvas id="game-canvas" width="900" height="400"></canvas>
+    <div id="lightning-indicator">
+      <span>⚡ 落雷蓄力</span>
+      <div id="lightning-bar-wrap"><div id="lightning-bar"></div></div>
+      <span id="lightning-count">0/8</span>
+    </div>
+  </div>
+  <div id="combat-footer">
+    <div class="resource-display">
+      <span class="res gold">金幣 <b id="res-gold">0</b></span>
+      <span class="res crystal">魔晶 <b id="res-crystal">0</b></span>
+      <span class="res soul">靈魂 <b id="res-soul">0</b></span>
+    </div>
+    <div id="combat-log"></div>
+  </div>
+</div>
+
+<!-- Battle Result Screen -->
+<div id="screen-result" class="screen">
+  <div class="result-box">
+    <h2 id="result-title">戰鬥結束</h2>
+    <div id="result-stats"></div>
+    <div id="result-rewards"></div>
+    <button id="btn-to-upgrade" class="btn-primary">前往升級</button>
+  </div>
+</div>
+
+<!-- Upgrade Screen -->
+<div id="screen-upgrade" class="screen">
+  <div id="upgrade-header">
+    <div class="resource-bar">
+      <span class="res gold">金幣 <b id="up-gold">0</b></span>
+      <span class="res crystal">魔晶 <b id="up-crystal">0</b></span>
+      <span class="res soul">靈魂 <b id="up-soul">0</b></span>
+    </div>
+    <button id="btn-next-level" class="btn-primary">出發 →</button>
+  </div>
+  <div id="skill-tabs">
+    <button class="tab active" data-tab="auto-normal">普通射擊</button>
+    <button class="tab" data-tab="auto-bomb">炸彈</button>
+    <button class="tab" data-tab="click-arrow">點擊箭矢</button>
+    <button class="tab" data-tab="click-lightning">落雷</button>
+    <button class="tab" data-tab="castle">主堡</button>
+  </div>
+  <div id="skill-panels">
+    <div class="skill-panel active" id="panel-auto-normal"></div>
+    <div class="skill-panel" id="panel-auto-bomb"></div>
+    <div class="skill-panel" id="panel-click-arrow"></div>
+    <div class="skill-panel" id="panel-click-lightning"></div>
+    <div class="skill-panel" id="panel-castle"></div>
+  </div>
+</div>
+
+<script src="js/constants.js"></script>
+<script src="js/save.js"></script>
+<script src="js/skills.js"></script>
+<script src="js/monsters.js"></script>
+<script src="js/projectiles.js"></script>
+<script src="js/combat.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

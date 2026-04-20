@@ -72,9 +72,8 @@ const Combat = (() => {
 
   function startRound() {
     attachClickListener();
-    const lvlIdx = Math.min(state.currentLevel - 1, C.LEVELS.length - 1);
-    levelCfg = C.LEVELS[lvlIdx];
-    combatStats = Skills.getCombatStats(state.skillLevels);
+    levelCfg = C.getLevelConfig(state.currentLevel);
+    combatStats = Skills.getCombatStats(state.skillLevels, state.infiniteLevels);
 
     castleMaxHp = combatStats.castleMaxHp;
     castleHp = castleMaxHp;
@@ -277,9 +276,10 @@ const Combat = (() => {
       if (!m.alive && !m.rewarded) {
         m.rewarded = true;
         totalKills++;
-        const g = randInt(m.reward.gold[0], m.reward.gold[1]);
-        const c = Math.random() < m.reward.crystal ? 1 : 0;
-        const s = Math.random() < m.reward.soul ? 1 : 0;
+        const rm = levelCfg.rewardMult;
+        const g = Math.round(randInt(m.reward.gold[0], m.reward.gold[1]) * rm);
+        const c = Math.random() < m.reward.crystal * Math.min(rm, 4) ? 1 : 0;
+        const s = Math.random() < m.reward.soul    * Math.min(rm, 4) ? 1 : 0;
         roundGold    += g;
         roundCrystal += c;
         roundSoul    += s;

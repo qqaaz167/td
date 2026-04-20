@@ -32,26 +32,24 @@ const UI = (() => {
     showScreen('screen-result');
   }
 
-  function renderUpgradeScreen(skillLevels, resources, onBuy, currentLevel) {
+  function renderUpgradeScreen(skillLevels, resources, onBuy, currentLevel, infiniteLevels, onBuyInfinite) {
     // Update resource display
     document.getElementById('up-gold').textContent = resources.gold;
     document.getElementById('up-crystal').textContent = resources.crystal;
     document.getElementById('up-soul').textContent = resources.soul;
 
     // Update next level button label
-    const nextLvl = Math.min(currentLevel + 1, C.LEVELS.length);
-    document.getElementById('btn-next-level').textContent =
-      currentLevel >= C.LEVELS.length ? '全關卡完成！' : `前往第 ${nextLvl} 關 →`;
-    document.getElementById('btn-next-level').disabled = currentLevel >= C.LEVELS.length;
+    document.getElementById('btn-next-level').textContent = `前往第 ${currentLevel + 1} 關 →`;
+    document.getElementById('btn-next-level').disabled = false;
 
     // Render each skill panel
     const keys = ['auto-normal', 'auto-bomb', 'click-arrow', 'click-lightning', 'castle'];
     for (const key of keys) {
-      renderSkillPanel(key, skillLevels, resources, onBuy);
+      renderSkillPanel(key, skillLevels, resources, onBuy, infiniteLevels, onBuyInfinite);
     }
   }
 
-  function renderSkillPanel(key, skillLevels, resources, onBuy) {
+  function renderSkillPanel(key, skillLevels, resources, onBuy, infiniteLevels, onBuyInfinite) {
     const panel = document.getElementById(`panel-${key}`);
     if (!panel) return;
 
@@ -94,11 +92,40 @@ const UI = (() => {
       </div>`;
     }
 
+    // ── Infinite upgrade node ──
+    const inf     = C.INFINITE_UPGRADES[key];
+    const infLvl  = (infiniteLevels || {})[key] || 0;
+    const infCost = C.infiniteUpgradeCost(key, infLvl);
+    const infCanBuy = onBuyInfinite && Skills.canAffordInfinite(key, infiniteLevels || {}, resources);
+    const isCastle  = key === 'castle';
+    const curBonus  = isCastle
+      ? `+${infLvl * inf.bonusPerLevel} HP`
+      : `×${(1 + infLvl * inf.bonusPerLevel).toFixed(2)}`;
+    const nextBonus = isCastle
+      ? `+${(infLvl + 1) * inf.bonusPerLevel} HP`
+      : `×${(1 + (infLvl + 1) * inf.bonusPerLevel).toFixed(2)}`;
+
+    html += `
+    <div class="skill-node inf-node">
+      <h4>∞ ${inf.label}</h4>
+      <div class="level-display" style="color:#f0c040">Lv.${infLvl}</div>
+      <div class="skill-stat">
+        現在：${curBonus}<br>
+        下級：${nextBonus}
+      </div>
+      <div class="cost">${formatCost(infCost)}</div>
+      <button
+        ${infCanBuy ? '' : 'disabled'}
+        onclick="window.__onBuyInfinite('${key}')"
+      >強化</button>
+    </div>`;
+
     html += '</div>';
     panel.innerHTML = html;
 
-    // Store callback
-    window.__onBuySkill = onBuy;
+    // Store callbacks
+    window.__onBuySkill    = onBuy;
+    window.__onBuyInfinite = onBuyInfinite;
   }
 
   function formatSkillStat(key, d) {

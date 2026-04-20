@@ -50,14 +50,19 @@ function openUpgrade() {
         openUpgrade();
       }
     },
-    gameState.currentLevel
+    gameState.currentLevel,
+    gameState.infiniteLevels,
+    key => {
+      if (Skills.buyInfinite(key, gameState.infiniteLevels, gameState.resources)) {
+        Save.save(gameState);
+        openUpgrade();
+      }
+    }
   );
 }
 
 function advanceAndPlay() {
-  if (gameState.currentLevel < C.LEVELS.length) {
-    gameState.currentLevel++;
-  }
+  gameState.currentLevel++;
   Save.save(gameState);
   startCombat();
 }

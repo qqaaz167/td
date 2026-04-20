@@ -14,6 +14,13 @@ const Save = {
         'click-arrow':      0,
         'click-lightning':  0,
         'castle':           0,
+      },
+      infiniteLevels: {
+        'auto-normal':      0,
+        'auto-bomb':        0,
+        'click-arrow':      0,
+        'click-lightning':  0,
+        'castle':           0,
       }
     };
   },
@@ -22,7 +29,13 @@ const Save = {
     try {
       const raw = localStorage.getItem(SAVE_KEY);
       if (!raw) return this.defaultState();
-      return Object.assign(this.defaultState(), JSON.parse(raw));
+      const parsed = JSON.parse(raw);
+      const def = this.defaultState();
+      def.currentLevel  = parsed.currentLevel  || 1;
+      def.resources     = Object.assign(def.resources,     parsed.resources     || {});
+      def.skillLevels   = Object.assign(def.skillLevels,   parsed.skillLevels   || {});
+      def.infiniteLevels = Object.assign(def.infiniteLevels, parsed.infiniteLevels || {});
+      return def;
     } catch {
       return this.defaultState();
     }
@@ -30,9 +43,10 @@ const Save = {
 
   save(state) {
     localStorage.setItem(SAVE_KEY, JSON.stringify({
-      currentLevel: state.currentLevel,
-      resources: state.resources,
-      skillLevels: state.skillLevels,
+      currentLevel:   state.currentLevel,
+      resources:      state.resources,
+      skillLevels:    state.skillLevels,
+      infiniteLevels: state.infiniteLevels,
     }));
   },
 

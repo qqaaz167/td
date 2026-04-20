@@ -77,19 +77,6 @@ const C = {
   BASE_CASTLE_HP: 500,
 
   // ── Level configs ──
-  // spawnInterval: seconds between each monster spawn
-  LEVELS: [
-    { spawnInterval: 2.2, hpMult: 1.0,  atkMult: 1.0,  dist: { swarm: .90, tank: .10, ranged: .00 } },
-    { spawnInterval: 2.0, hpMult: 1.2,  atkMult: 1.1,  dist: { swarm: .80, tank: .15, ranged: .05 } },
-    { spawnInterval: 1.8, hpMult: 1.5,  atkMult: 1.2,  dist: { swarm: .70, tank: .20, ranged: .10 } },
-    { spawnInterval: 1.6, hpMult: 1.9,  atkMult: 1.4,  dist: { swarm: .65, tank: .20, ranged: .15 } },
-    { spawnInterval: 1.4, hpMult: 2.4,  atkMult: 1.6,  dist: { swarm: .55, tank: .25, ranged: .20 } },
-    { spawnInterval: 1.2, hpMult: 3.0,  atkMult: 1.9,  dist: { swarm: .50, tank: .28, ranged: .22 } },
-    { spawnInterval: 1.1, hpMult: 3.8,  atkMult: 2.2,  dist: { swarm: .45, tank: .30, ranged: .25 } },
-    { spawnInterval: 1.0, hpMult: 4.8,  atkMult: 2.6,  dist: { swarm: .40, tank: .33, ranged: .27 } },
-    { spawnInterval: 0.9, hpMult: 6.0,  atkMult: 3.1,  dist: { swarm: .35, tank: .35, ranged: .30 } },
-    { spawnInterval: 0.8, hpMult: 7.5,  atkMult: 3.7,  dist: { swarm: .30, tank: .35, ranged: .35 } },
-  ],
 
   // Base monster stats (before level multiplier)
   MONSTER_BASE: {
@@ -102,4 +89,42 @@ const C = {
   RANGED_ATTACK_RANGE: 260,
   RANGED_PROJ_SPEED: 150,
 
+};
+
+// Infinite level config generator (n = 1-based level number)
+C.getLevelConfig = function(n) {
+  const t = n - 1;
+  const swarm  = Math.max(0.25, 0.90 - t * 0.06);
+  const tank   = Math.min(0.40, 0.10 + t * 0.03);
+  const ranged = Math.min(0.40, 0.00 + t * 0.03);
+  // normalise so they sum to 1
+  const total  = swarm + tank + ranged;
+  return {
+    spawnInterval: Math.max(0.45, 2.2 - t * 0.12),
+    hpMult:     Math.pow(1.28, t),
+    atkMult:    Math.pow(1.10, t),
+    rewardMult: Math.pow(1.15, t),   // gold scales ~same curve as difficulty
+    dist: { swarm: swarm / total, tank: tank / total, ranged: ranged / total },
+  };
+};
+
+// Infinite upgrade definitions per skill tree
+// bonusPerLevel: damage trees = damage multiplier per level (+25%), castle = flat HP per level
+C.INFINITE_UPGRADES = {
+  'auto-normal':     { label: '強化傷害', bonusPerLevel: 0.25, baseCost: { gold: 60,  crystal: 8,  soul: 0  } },
+  'auto-bomb':       { label: '強化爆炸', bonusPerLevel: 0.25, baseCost: { gold: 60,  crystal: 8,  soul: 0  } },
+  'click-arrow':     { label: '強化箭矢', bonusPerLevel: 0.25, baseCost: { gold: 60,  crystal: 8,  soul: 0  } },
+  'click-lightning': { label: '強化落雷', bonusPerLevel: 0.25, baseCost: { gold: 60,  crystal: 10, soul: 0  } },
+  'castle':          { label: '強化生命', bonusPerLevel: 200,  baseCost: { gold: 0,   crystal: 0,  soul: 20 } },
+};
+
+// Cost to buy the next infinite level: base * 1.5^currentLevel
+C.infiniteUpgradeCost = function(key, currentLevel) {
+  const base = C.INFINITE_UPGRADES[key].baseCost;
+  const mul  = Math.pow(1.5, currentLevel);
+  return {
+    gold:    Math.round(base.gold    * mul),
+    crystal: Math.round(base.crystal * mul),
+    soul:    Math.round(base.soul    * mul),
+  };
 };

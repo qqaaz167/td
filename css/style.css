@@ -269,4 +269,39 @@ body {
   .result-box { padding: 24px 16px; }
 }
 
+/* ── Infinite upgrade node ── */
+.inf-node {
+  border-color: #d2a8ff !important;
+  background: #1a1230 !important;
+}
+.inf-node h4 { color: #d2a8ff !important; }
+.inf-node button { background: #6e40c9 !important; }
+.inf-node button:disabled { background: #333 !important; color: #666 !important; }
+
+/* ── Mobile landscape: height-constrain canvas so header+canvas+footer fits ── */
+@media (orientation: landscape) and (max-height: 560px) {
+  body { align-items: flex-start; }
+
+  /* canvas switches from width-driven to height-driven */
+  #game-canvas {
+    width: auto;
+    height: calc(100vh - 96px);
+    height: calc(100svh - 96px); /* svh excludes browser chrome on mobile */
+    max-width: 100%;
+  }
+
+  #canvas-wrap {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* tighten header/footer so they eat less vertical space */
+  #combat-header,
+  #combat-footer {
+    padding: 4px 10px;
+    font-size: .75rem;
+  }
+  #hud-timer { font-size: .9rem; }
+}
+
 /* ── Float damage text (canvas-rendered, not DOM) ── */

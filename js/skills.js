@@ -48,46 +48,75 @@ const Skills = {
     return true;
   },
 
-  // Derived combat stats from current skill levels
-  getCombatStats(skillLevels) {
+  // Derived combat stats from current skill levels + infinite upgrades
+  getCombatStats(skillLevels, infiniteLevels) {
     const an = this.getStats('auto-normal', skillLevels);
     const ab = this.getStats('auto-bomb', skillLevels);
     const ca = this.getStats('click-arrow', skillLevels);
     const cl = this.getStats('click-lightning', skillLevels);
     const cs = this.getStats('castle', skillLevels);
+    const il = infiniteLevels || {};
+
+    // damage multipliers from infinite upgrades
+    const mAN = 1 + (il['auto-normal']     || 0) * C.INFINITE_UPGRADES['auto-normal'].bonusPerLevel;
+    const mAB = 1 + (il['auto-bomb']       || 0) * C.INFINITE_UPGRADES['auto-bomb'].bonusPerLevel;
+    const mCA = 1 + (il['click-arrow']     || 0) * C.INFINITE_UPGRADES['click-arrow'].bonusPerLevel;
+    const mCL = 1 + (il['click-lightning'] || 0) * C.INFINITE_UPGRADES['click-lightning'].bonusPerLevel;
+    const hpBonus = (il['castle'] || 0) * C.INFINITE_UPGRADES['castle'].bonusPerLevel;
 
     return {
-      // auto normal — always active with base stats; buying upgrades it
+      // auto normal — always active; buying upgrades it
       autoEnabled: true,
       autoProjectiles: an ? an.projectiles : 1,
-      autoDamage: an ? an.damage : 8,
+      autoDamage: Math.round((an ? an.damage : 8) * mAN),
       autoCrit: an ? an.critChance : 0,
       autoRate: C.SKILLS['auto-normal'].fireRate,
 
-      // auto bomb — still requires purchase
+      // auto bomb — requires purchase
       bombEnabled: !!ab,
       bombRadius: ab ? ab.radius : 0,
-      bombDamage: ab ? ab.damage : 0,
+      bombDamage: Math.round((ab ? ab.damage : 0) * mAB),
       bombBurnDuration: ab ? ab.burnDuration : 0,
-      bombBurnDps: ab ? ab.burnDps : 0,
+      bombBurnDps: Math.round((ab ? ab.burnDps : 0) * mAB),
       bombRate: C.SKILLS['auto-bomb'].fireRate,
 
-      // click arrow — always active with base stats; buying upgrades it
+      // click arrow — always active
       arrowEnabled: true,
       arrowCount: ca ? ca.arrows : 1,
-      arrowDamage: ca ? ca.damage : 35,
+      arrowDamage: Math.round((ca ? ca.damage : 35) * mCA),
       arrowPierce: ca ? ca.pierce : 0,
 
-      // click lightning
-      // lightning — always active with base stats; buying upgrades it
+      // lightning — always active
       lightningEnabled: true,
       lightningClicksNeeded: cl ? cl.clicksNeeded : 8,
       lightningRadius: cl ? cl.radius : 70,
-      lightningDamage: cl ? cl.damage : 150,
+      lightningDamage: Math.round((cl ? cl.damage : 150) * mCL),
 
       // castle
-      castleMaxHp: cs ? cs.hp : C.BASE_CASTLE_HP,
+      castleMaxHp: (cs ? cs.hp : C.BASE_CASTLE_HP) + hpBonus,
       castleDefense: cs ? cs.defense : 0,
     };
+  },
+
+  // ── Infinite upgrade helpers ──
+  infiniteUpgradeCost(key, infiniteLevels) {
+    return C.infiniteUpgradeCost(key, (infiniteLevels || {})[key] || 0);
+  },
+
+  canAffordInfinite(key, infiniteLevels, resources) {
+    const cost = this.infiniteUpgradeCost(key, infiniteLevels);
+    return resources.gold    >= cost.gold &&
+           resources.crystal >= cost.crystal &&
+           resources.soul    >= cost.soul;
+  },
+
+  buyInfinite(key, infiniteLevels, resources) {
+    if (!this.canAffordInfinite(key, infiniteLevels, resources)) return false;
+    const cost = this.infiniteUpgradeCost(key, infiniteLevels);
+    resources.gold    -= cost.gold;
+    resources.crystal -= cost.crystal;
+    resources.soul    -= cost.soul;
+    infiniteLevels[key] = (infiniteLevels[key] || 0) + 1;
+    return true;
   }
 };
